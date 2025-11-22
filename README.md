@@ -10,7 +10,7 @@ with configurable exclude lists by author name and user ID, and keeps running ev
 
 ## Overview
 
-`vk-stories-auto-hider.js` is a small browser console script that:
+`vk-hide-stories-script/main.js` is a small browser console script that:
 
 - Automatically opens the story menu → clicks “Hide from stories” → confirms the action.
 - Runs in a loop (number of iterations is configurable).
@@ -27,7 +27,7 @@ with configurable exclude lists by author name and user ID, and keeps running ev
 3. Open the **developer console**:
    - Windows / Linux: `F12` or `Ctrl+Shift+I`, then go to the **Console** tab.
    - macOS: `Cmd+Opt+I`, then go to the **Console** tab.
-4. Open `vk-stories-auto-hider.js` from this repository and copy **the entire script**.
+4. Open `vk-hide-stories-script/main.js` from this repository and copy **the entire script**.
 5. Paste the script into the browser console and press Enter.
 6. Adjust the `EXCLUDED_NAMES` and `EXCLUDED_IDS` arrays at the top of the script if needed (see below).
 7. Run the script with, for example:
@@ -45,7 +45,7 @@ The script will continue to work in the background as long as the tab stays load
 
 ## Configuring exclude lists
 
-At the top of `vk-stories-auto-hider.js` there are two arrays:
+At the top of `vk-hide-stories-script/main.js` there are two arrays:
 
 ```js
 // Friends whose stories should NOT be hidden.
@@ -207,7 +207,7 @@ hideVkStoriesWithExclusions(200);
 
 ## Обзор
 
-`vk-stories-auto-hider.js` — небольшой скрипт для браузерной консоли, который:
+`vk-hide-stories-script/main.js` — небольшой скрипт для браузерной консоли, который:
 
 * Автоматически открывает меню истории → нажимает «Скрыть из историй» → подтверждает действие.
 * Работает в цикле (количество итераций задаётся параметром).
@@ -225,7 +225,7 @@ hideVkStoriesWithExclusions(200);
 
    * Windows / Linux: `F12` или `Ctrl+Shift+I`, вкладка **Console**.
    * macOS: `Cmd+Opt+I`, вкладка **Console**.
-4. Откройте файл `vk-stories-auto-hider.js` из репозитория и скопируйте **весь скрипт**.
+4. Откройте файл `vk-hide-stories-script/main.js` из репозитория и скопируйте **весь скрипт**.
 5. Вставьте скрипт в консоль браузера и нажмите Enter.
 6. При необходимости отредактируйте массивы `EXCLUDED_NAMES` и `EXCLUDED_IDS` в начале скрипта (см. ниже).
 7. Запустите скрипт, например:
@@ -242,7 +242,7 @@ hideVkStoriesWithExclusions(200);
 
 ## Настройка списков исключений
 
-В начале файла `vk-stories-auto-hider.js` есть два массива:
+В начале файла `vk-hide-stories-script/main.js` есть два массива:
 
 ```js
 // Список имён друзей, чьи истории НЕ нужно скрывать.
@@ -401,7 +401,7 @@ hideVkStoriesWithExclusions(200);
 
 2. Открыть консоль браузера.
 
-3. Вставить содержимое `vk-stories-auto-hider.js`.
+3. Вставить содержимое `vk-hide-stories-script/main.js`.
 
 4. Настроить `EXCLUDED_NAMES` и `EXCLUDED_IDS`.
 
