@@ -1,7 +1,9 @@
 # VK Stories Auto Hider
 
 Браузерный скрипт для консоли, который автоматически скрывает истории друзей ВКонтакте  
-из вашей ленты, с поддержкой списков исключений по имени и ID пользователя.
+из вашей ленты, с настраиваемыми списками исключений по имени и ID пользователя и продолжает работать,  
+даже если вкладка с VK не активна (можно переключиться на другие вкладки и пользоваться браузером как обычно).
+
 <details>
 <summary><strong>Инструкция на русском</strong></summary>
 
@@ -218,7 +220,8 @@ hideVkStoriesWithExclusions(100);
 ---
 
 Browser console script that automatically hides VK friends’ stories from your feed,  
-with support for exclude lists by author name and user ID.
+with configurable exclude lists by author name and user ID, and keeps running even when the VK tab is inactive  
+(you can switch to other tabs and continue using your browser as usual).
 
 
 <details>
