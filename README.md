@@ -1,5 +1,203 @@
 # VK Stories Auto Hider
 
+Browser console script that automatically hides VK friends’ stories from your feed,  
+with configurable exclude lists by author name and user ID, and keeps running even when the VK tab is inactive  
+(you can switch to other tabs and continue using your browser as usual).
+
+
+<details>
+<summary><strong>English instructions</strong></summary>
+
+## Overview
+
+`vk-stories-auto-hider.js` is a small browser console script that:
+
+- Automatically opens the story menu → clicks “Hide from stories” → confirms the action.
+- Runs in a loop (number of iterations is configurable).
+- Supports **exclude lists by author name** and **by user ID** (from `href="/someid"`).
+- For authors in the exclude lists, stories are **not hidden**, they are **skipped** by jumping to the next story.
+- After you start it, the script keeps working **even if the browser tab is not active** — you can switch to other tabs and continue using your browser normally.
+
+---
+
+## How to use
+
+1. Open **vk.com** and log in to your account.
+2. Open the **first story** you want to process in the VK story viewer (the story should be centered on the screen).
+3. Open the **developer console**:
+   - Windows / Linux: `F12` or `Ctrl+Shift+I`, then go to the **Console** tab.
+   - macOS: `Cmd+Opt+I`, then go to the **Console** tab.
+4. Open `vk-stories-auto-hider.js` from this repository and copy **the entire script**.
+5. Paste the script into the browser console and press Enter.
+6. Adjust the `EXCLUDED_NAMES` and `EXCLUDED_IDS` arrays at the top of the script if needed (see below).
+7. Run the script with, for example:
+
+```js
+hideVkStoriesWithExclusions(200);
+```
+
+where `200` is the number of cycles (roughly, how many times the script will attempt to hide or skip stories in a row).
+
+You can now **leave the VK tab open and switch to other tabs**.
+The script will continue to work in the background as long as the tab stays loaded and is not fully suspended by the browser.
+
+---
+
+## Configuring exclude lists
+
+At the top of `vk-stories-auto-hider.js` there are two arrays:
+
+```js
+// Friends whose stories should NOT be hidden.
+// Format: 'First Last', case-insensitive.
+const EXCLUDED_NAMES = [
+  // 'Example Name',
+];
+
+// Friends whose stories should NOT be hidden, by VK ID from href="/idOrNickname".
+const EXCLUDED_IDS = [
+  // 'example_id',
+];
+```
+
+### Excluding by name
+
+* Add entries like this:
+
+```js
+const EXCLUDED_NAMES = [
+  'First Last',
+  'Some Name',
+];
+```
+
+* Comparison is case-insensitive, so `FIRST LAST`, `First Last` and `first last` are treated the same.
+
+The name is taken from the story header, from an element with classes like
+`StoryInfo__title StoryInfo__title--author`.
+
+### Excluding by user ID
+
+* Open the author’s profile link in the story header and look at the `href` attribute:
+
+```text
+/id123456
+/some_nickname
+```
+
+* Use the part after `/` as an entry in `EXCLUDED_IDS`:
+
+```js
+const EXCLUDED_IDS = [
+  'id123456',
+  'some_nickname',
+];
+```
+
+The script normalizes the ID (trims spaces, lowercases) before comparison.
+
+---
+
+## Example run
+
+1. Configure:
+
+ ```js
+ const EXCLUDED_NAMES = [
+   'First Last',
+ ];
+
+ const EXCLUDED_IDS = [
+   'id123456',
+ ];
+ ```
+
+2. Open any VK story.
+
+3. Paste the script into the console.
+
+4. Start it:
+
+ ```js
+ hideVkStoriesWithExclusions(100);
+ ```
+
+What happens next:
+
+* Stories of authors **not** in the exclude lists are automatically hidden.
+* Stories of authors **in** the exclude lists are **not** hidden; instead, the script simulates a click on the area to the right of the story to move to the next one.
+
+---
+
+## How it works (simplified)
+
+For each step (cycle):
+
+1. The script finds the **active story** using selectors like:
+
+ ```js
+ .stories_item.multi_stories.active
+ // or fallback:
+ .stories_item.active
+ ```
+
+2. It reads the current author:
+
+   * The **name** from `StoryInfo__title StoryInfo__title--author`.
+   * The **user ID** from `href` of the profile/author link (`/idXXXX` or `/nickname`), or from the avatar link.
+
+3. It normalizes name and ID (trim, lowercase) and checks them against `EXCLUDED_NAMES` and `EXCLUDED_IDS`.
+
+4. If the author is in the exclude lists:
+
+   * The story is **not hidden**.
+   * The script finds the story container `.stories_item_cont`, calculates its bounding box, and then:
+
+     * X = right edge of the story + 100px (clamped to the window width).
+     * Y = vertical center of the window.
+     * It calls `document.elementFromPoint(x, y)` and dispatches a sequence of mouse events: `mousedown`, `mouseup`, `click`.
+   * VK interprets this as a click to the right of the story and moves to the next story.
+
+5. If the author is **not** in the exclude lists:
+
+   * The script finds the story menu button using `data-testid="story_header_menu_button"` (globally).
+   * It simulates `mousedown`, `mouseup`, `click` on that button.
+   * In the opened menu it selects the item with `data-testid="story_header_menu_action_add_blacklist"` (the “Hide from stories” action).
+   * In the confirmation modal it searches for the primary button with text `Скрыть из историй` and clicks it (again via `mousedown`, `mouseup`, `click`).
+   * The story is hidden from your stories feed.
+
+6. Between steps, the script waits short delays (`sleep`) to give VK time to open menus and update the UI.
+
+7. The script logs what it’s doing into the console: current author, ID, whether the story was hidden or skipped, etc.
+
+---
+
+## Running in a background / inactive tab
+
+After you start:
+
+```js
+hideVkStoriesWithExclusions(200);
+```
+
+* The script keeps running **even if the tab is not active**.
+* You can switch to other tabs or apps and return later to see the result.
+* Most modern browsers keep JavaScript running in an inactive tab, though they can slow it down or suspend it if the tab stays idle for a long time or if there are aggressive power-saving settings.
+
+---
+
+## Notes and limitations
+
+* VK’s HTML structure (`data-testid`, class names, etc.) may change in the future.
+
+  * If the script stops finding elements (menu button, menu item, confirmation button), inspect the page and update the selectors in the script.
+* The script does not send any network requests itself; it only simulates your own clicks in the interface.
+* Use it responsibly and in accordance with VK’s terms of service.
+
+</details>
+
+---
+
 Браузерный скрипт для консоли, который автоматически скрывает истории друзей ВКонтакте  
 из вашей ленты, с настраиваемыми списками исключений по имени и ID пользователя и продолжает работать,  
 даже если вкладка с VK не активна (можно переключиться на другие вкладки и пользоваться браузером как обычно).
@@ -214,203 +412,5 @@ hideVkStoriesWithExclusions(100);
 ```
 
 6. Переключиться на другие вкладки — скрипт продолжит работать в фоне.
-
-</details>
-
----
-
-Browser console script that automatically hides VK friends’ stories from your feed,  
-with configurable exclude lists by author name and user ID, and keeps running even when the VK tab is inactive  
-(you can switch to other tabs and continue using your browser as usual).
-
-
-<details>
-<summary><strong>English instructions</strong></summary>
-
-## Overview
-
-`vk-stories-auto-hider.js` is a small browser console script that:
-
-- Automatically opens the story menu → clicks “Hide from stories” → confirms the action.
-- Runs in a loop (number of iterations is configurable).
-- Supports **exclude lists by author name** and **by user ID** (from `href="/someid"`).
-- For authors in the exclude lists, stories are **not hidden**, they are **skipped** by jumping to the next story.
-- After you start it, the script keeps working **even if the browser tab is not active** — you can switch to other tabs and continue using your browser normally.
-
----
-
-## How to use
-
-1. Open **vk.com** and log in to your account.
-2. Open the **first story** you want to process in the VK story viewer (the story should be centered on the screen).
-3. Open the **developer console**:
-   - Windows / Linux: `F12` or `Ctrl+Shift+I`, then go to the **Console** tab.
-   - macOS: `Cmd+Opt+I`, then go to the **Console** tab.
-4. Open `vk-stories-auto-hider.js` from this repository and copy **the entire script**.
-5. Paste the script into the browser console and press Enter.
-6. Adjust the `EXCLUDED_NAMES` and `EXCLUDED_IDS` arrays at the top of the script if needed (see below).
-7. Run the script with, for example:
-
-```js
-hideVkStoriesWithExclusions(200);
-```
-
-where `200` is the number of cycles (roughly, how many times the script will attempt to hide or skip stories in a row).
-
-You can now **leave the VK tab open and switch to other tabs**.
-The script will continue to work in the background as long as the tab stays loaded and is not fully suspended by the browser.
-
----
-
-## Configuring exclude lists
-
-At the top of `vk-stories-auto-hider.js` there are two arrays:
-
-```js
-// Friends whose stories should NOT be hidden.
-// Format: 'First Last', case-insensitive.
-const EXCLUDED_NAMES = [
-  // 'Example Name',
-];
-
-// Friends whose stories should NOT be hidden, by VK ID from href="/idOrNickname".
-const EXCLUDED_IDS = [
-  // 'example_id',
-];
-```
-
-### Excluding by name
-
-* Add entries like this:
-
-```js
-const EXCLUDED_NAMES = [
-  'First Last',
-  'Some Name',
-];
-```
-
-* Comparison is case-insensitive, so `FIRST LAST`, `First Last` and `first last` are treated the same.
-
-The name is taken from the story header, from an element with classes like
-`StoryInfo__title StoryInfo__title--author`.
-
-### Excluding by user ID
-
-* Open the author’s profile link in the story header and look at the `href` attribute:
-
-```text
-/id123456
-/some_nickname
-```
-
-* Use the part after `/` as an entry in `EXCLUDED_IDS`:
-
-```js
-const EXCLUDED_IDS = [
-  'id123456',
-  'some_nickname',
-];
-```
-
-The script normalizes the ID (trims spaces, lowercases) before comparison.
-
----
-
-## Example run
-
-1. Configure:
-
- ```js
- const EXCLUDED_NAMES = [
-   'First Last',
- ];
-
- const EXCLUDED_IDS = [
-   'id123456',
- ];
- ```
-
-2. Open any VK story.
-
-3. Paste the script into the console.
-
-4. Start it:
-
- ```js
- hideVkStoriesWithExclusions(100);
- ```
-
-What happens next:
-
-* Stories of authors **not** in the exclude lists are automatically hidden.
-* Stories of authors **in** the exclude lists are **not** hidden; instead, the script simulates a click on the area to the right of the story to move to the next one.
-
----
-
-## How it works (simplified)
-
-For each step (cycle):
-
-1. The script finds the **active story** using selectors like:
-
- ```js
- .stories_item.multi_stories.active
- // or fallback:
- .stories_item.active
- ```
-
-2. It reads the current author:
-
-   * The **name** from `StoryInfo__title StoryInfo__title--author`.
-   * The **user ID** from `href` of the profile/author link (`/idXXXX` or `/nickname`), or from the avatar link.
-
-3. It normalizes name and ID (trim, lowercase) and checks them against `EXCLUDED_NAMES` and `EXCLUDED_IDS`.
-
-4. If the author is in the exclude lists:
-
-   * The story is **not hidden**.
-   * The script finds the story container `.stories_item_cont`, calculates its bounding box, and then:
-
-     * X = right edge of the story + 100px (clamped to the window width).
-     * Y = vertical center of the window.
-     * It calls `document.elementFromPoint(x, y)` and dispatches a sequence of mouse events: `mousedown`, `mouseup`, `click`.
-   * VK interprets this as a click to the right of the story and moves to the next story.
-
-5. If the author is **not** in the exclude lists:
-
-   * The script finds the story menu button using `data-testid="story_header_menu_button"` (globally).
-   * It simulates `mousedown`, `mouseup`, `click` on that button.
-   * In the opened menu it selects the item with `data-testid="story_header_menu_action_add_blacklist"` (the “Hide from stories” action).
-   * In the confirmation modal it searches for the primary button with text `Скрыть из историй` and clicks it (again via `mousedown`, `mouseup`, `click`).
-   * The story is hidden from your stories feed.
-
-6. Between steps, the script waits short delays (`sleep`) to give VK time to open menus and update the UI.
-
-7. The script logs what it’s doing into the console: current author, ID, whether the story was hidden or skipped, etc.
-
----
-
-## Running in a background / inactive tab
-
-After you start:
-
-```js
-hideVkStoriesWithExclusions(200);
-```
-
-* The script keeps running **even if the tab is not active**.
-* You can switch to other tabs or apps and return later to see the result.
-* Most modern browsers keep JavaScript running in an inactive tab, though they can slow it down or suspend it if the tab stays idle for a long time or if there are aggressive power-saving settings.
-
----
-
-## Notes and limitations
-
-* VK’s HTML structure (`data-testid`, class names, etc.) may change in the future.
-
-  * If the script stops finding elements (menu button, menu item, confirmation button), inspect the page and update the selectors in the script.
-* The script does not send any network requests itself; it only simulates your own clicks in the interface.
-* Use it responsibly and in accordance with VK’s terms of service.
 
 </details>
