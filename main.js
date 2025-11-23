@@ -37,6 +37,19 @@ function getActiveStoryElement() {
   );
 }
 
+const EVENT_INIT = {
+  bubbles: true,
+  cancelable: true,
+  view: window,
+};
+
+function emulateClick(target, eventInit = EVENT_INIT) {
+  ['mousedown', 'mouseup', 'click'].forEach((type) => {
+    const ev = new MouseEvent(type, eventInit);
+    target.dispatchEvent(ev);
+  });
+}
+
 // Имя + id автора
 function getAuthorInfoFromActiveStory(activeStoryEl) {
   if (!activeStoryEl) return { name: null, id: null };
@@ -130,17 +143,10 @@ function goToNextStoryByScreenClick(activeStoryEl) {
     { x, y, target }
   );
 
-  const eventInit = {
-    bubbles: true,
-    cancelable: true,
-    view: window,
+  emulateClick(target, {
+    ...EVENT_INIT,
     clientX: x,
     clientY: y,
-  };
-
-  ['mousedown', 'mouseup', 'click'].forEach((type) => {
-    const ev = new MouseEvent(type, eventInit);
-    target.dispatchEvent(ev);
   });
 
   return true;
@@ -233,27 +239,7 @@ async function hideVkStoriesWithExclusions(cyclesCount = 200) {
       continue;
     }
 
-    menuButton.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
-    menuButton.dispatchEvent(
-      new MouseEvent('mouseup', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
-    menuButton.dispatchEvent(
-      new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
+    emulateClick(menuButton);
 
     // ждём открытие меню
     await sleep(250);
@@ -269,27 +255,7 @@ async function hideVkStoriesWithExclusions(cyclesCount = 200) {
       continue;
     }
 
-    hideFromStoriesItem.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
-    hideFromStoriesItem.dispatchEvent(
-      new MouseEvent('mouseup', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
-    hideFromStoriesItem.dispatchEvent(
-      new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
+    emulateClick(hideFromStoriesItem);
 
     // ждём появление модалки
     await sleep(300);
@@ -313,27 +279,7 @@ async function hideVkStoriesWithExclusions(cyclesCount = 200) {
       continue;
     }
 
-    confirmButton.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
-    confirmButton.dispatchEvent(
-      new MouseEvent('mouseup', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
-    confirmButton.dispatchEvent(
-      new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
+    emulateClick(confirmButton);
 
     console.log('История скрыта');
 
